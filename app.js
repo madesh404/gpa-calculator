@@ -30,6 +30,7 @@ function parseCSV(text) {
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
 
+    if (!line) continue;
     if (i === 0 && line.toLowerCase().includes('course')) continue;
 
     const [code, credits, grade] = line.split(',').map(s => s.trim());
