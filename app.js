@@ -15,6 +15,10 @@ input.addEventListener('change', (e) => {
   reader.readAsText(file);
 });
 
+document.getElementById('drop-zone').addEventListener('click', () => {
+  document.getElementById('csv-input').click();
+});
+
 const VALID_GRADES = new Set([
   'A+', 'A', 'A-',
   'B+', 'B', 'B-',
