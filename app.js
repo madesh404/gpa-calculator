@@ -79,14 +79,64 @@ function renderTable(courses, gpa) {
   tbody.innerHTML = '';
   gpaDisplay.textContent = `Current GPA: ${gpa.toFixed(2)} / 4.33`;
 
-  for (const course of courses) {
+  for (let i = 0; i < courses.length; i++) {
+    const course = courses[i];
     const tr = document.createElement('tr');
+
+    const gradeOptions = Object.keys(GRADE_POINTS)
+      .map(g => `<option value="${g}" ${g === course.grade ? 'selected' : ''}>${g}</option>`)
+      .join('');
+
     tr.innerHTML = `
       <td>${course.code}</td>
       <td>${course.credits}</td>
       <td>${course.grade}</td>
       <td>${GRADE_POINTS[course.grade].toFixed(2)}</td>
+      <td><input type="checkbox" data-index="${i}"></td>
+      <td><select data-index="${i}" disabled>${gradeOptions}</select></td>
     `;
+
     tbody.appendChild(tr);
   }
+
+  // add headers for new columns
+  const headers = document.querySelectorAll('#course-table th');
+  if (headers.length === 4) {
+    document.querySelector('#course-table thead tr').innerHTML += `
+      <th>Retake?</th>
+      <th>Target Grade</th>
+    `;
+  }
+
+  document.getElementById('course-tbody').addEventListener('change', (e) => {
+    const index = e.target.dataset.index;
+
+    if (e.target.type === 'checkbox') {
+      const select = document.querySelector(`select[data-index="${index}"]`);
+      select.disabled = !e.target.checked;
+      courses[index].retake = e.target.checked;
+    }
+
+    if (e.target.tagName === 'SELECT') {
+      courses[index].retakeGrade = e.target.value;
+    }
+
+    updateProjectedGPA(courses);
+  });
+}
+
+function updateProjectedGPA(courses) {
+  const projected = courses.map(c => ({
+    ...c,
+    grade: c.retake ? c.retakeGrade : c.grade
+  }));
+
+  const projGPA = calcGPA(projected);
+  const curGPA = calcGPA(courses);
+
+  const diff = (projGPA - curGPA).toFixed(3);
+  const sign = diff >= 0 ? '+' : '';
+
+  document.getElementById('gpa-display').textContent =
+    `Current GPA: ${curGPA.toFixed(2)} / 4.33 → Projected: ${projGPA.toFixed(2)} / 4.33 (${sign}${diff})`;
 }
