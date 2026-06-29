@@ -10,8 +10,7 @@ input.addEventListener('change', (e) => {
   const text = e.target.result;
   const courses = parseCSV(text);
   const gpa = calcGPA(courses);
-  console.log('Courses:', courses);
-  console.log('GPA:', gpa.toFixed(2));
+  renderTable(courses, gpa);
   };
 
   reader.readAsText(file);
@@ -71,4 +70,23 @@ function calcGPA(courses) {
   }
 
   return totalPoints / totalCredits;
+}
+
+function renderTable(courses, gpa) {
+  const tbody = document.getElementById('course-tbody');
+  const gpaDisplay = document.getElementById('gpa-display');
+
+  tbody.innerHTML = '';
+  gpaDisplay.textContent = `Current GPA: ${gpa.toFixed(2)} / 4.33`;
+
+  for (const course of courses) {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${course.code}</td>
+      <td>${course.credits}</td>
+      <td>${course.grade}</td>
+      <td>${GRADE_POINTS[course.grade].toFixed(2)}</td>
+    `;
+    tbody.appendChild(tr);
+  }
 }
