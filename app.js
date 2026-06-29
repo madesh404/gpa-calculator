@@ -15,6 +15,14 @@ input.addEventListener('change', (e) => {
   reader.readAsText(file);
 });
 
+const VALID_GRADES = new Set([
+  'A+', 'A', 'A-',
+  'B+', 'B', 'B-',
+  'C+', 'C', 'C-',
+  'D+', 'D', 'D-',
+  'F'
+]);
+
 function parseCSV(text) {
   const lines = text.trim().split('\n');
   const courses = [];
@@ -22,15 +30,20 @@ function parseCSV(text) {
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
 
-    // skip header row
     if (i === 0 && line.toLowerCase().includes('course')) continue;
 
     const [code, credits, grade] = line.split(',').map(s => s.trim());
+    const gradeUpper = grade.toUpperCase();
+
+    if (!VALID_GRADES.has(gradeUpper)) {
+      console.log(`Skipping ${code} — grade "${grade}" not on GPA scale`);
+      continue;
+    }
 
     courses.push({
       code,
       credits: parseFloat(credits),
-      grade: grade.toUpperCase()
+      grade: gradeUpper
     });
   }
 
