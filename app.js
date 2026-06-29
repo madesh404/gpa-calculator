@@ -9,8 +9,7 @@ input.addEventListener('change', (e) => {
   reader.onload = (e) => {
   const text = e.target.result;
   const courses = parseCSV(text);
-  const gpa = calcGPA(courses);
-  renderTable(courses, gpa);
+  renderTable(courses);
   };
 
   reader.readAsText(file);
@@ -72,12 +71,12 @@ function calcGPA(courses) {
   return totalPoints / totalCredits;
 }
 
-function renderTable(courses, gpa) {
+function renderTable(courses) {
   const tbody = document.getElementById('course-tbody');
-  const gpaDisplay = document.getElementById('gpa-display');
-
   tbody.innerHTML = '';
-  gpaDisplay.textContent = `Current GPA: ${gpa.toFixed(2)} / 4.33`;
+
+  document.getElementById('results').style.display = 'block';
+  document.getElementById('total-credits').textContent = courses.reduce((s, c) => s + c.credits, 0);
 
   for (let i = 0; i < courses.length; i++) {
     const course = courses[i];
@@ -99,22 +98,15 @@ function renderTable(courses, gpa) {
     tbody.appendChild(tr);
   }
 
-  // add headers for new columns
-  const headers = document.querySelectorAll('#course-table th');
-  if (headers.length === 4) {
-    document.querySelector('#course-table thead tr').innerHTML += `
-      <th>Retake?</th>
-      <th>Target Grade</th>
-    `;
-  }
-
-  document.getElementById('course-tbody').addEventListener('change', (e) => {
+  tbody.addEventListener('change', (e) => {
     const index = e.target.dataset.index;
+    const tr = e.target.closest('tr');
 
     if (e.target.type === 'checkbox') {
       const select = document.querySelector(`select[data-index="${index}"]`);
       select.disabled = !e.target.checked;
       courses[index].retake = e.target.checked;
+      tr.classList.toggle('retaking', e.target.checked);
     }
 
     if (e.target.tagName === 'SELECT') {
@@ -123,20 +115,21 @@ function renderTable(courses, gpa) {
 
     updateProjectedGPA(courses);
   });
+
+  updateProjectedGPA(courses);
 }
 
 function updateProjectedGPA(courses) {
-  const projected = courses.map(c => ({
-    ...c,
-    grade: c.retake ? c.retakeGrade : c.grade
-  }));
-
-  const projGPA = calcGPA(projected);
   const curGPA = calcGPA(courses);
+  const projected = courses.map(c => ({ ...c, grade: c.retake ? c.retakeGrade : c.grade }));
+  const projGPA = calcGPA(projected);
+  const retakeCount = courses.filter(c => c.retake).length;
+  const diff = projGPA - curGPA;
 
-  const diff = (projGPA - curGPA).toFixed(3);
-  const sign = diff >= 0 ? '+' : '';
+  document.getElementById('cur-gpa').textContent = curGPA.toFixed(2);
+  document.getElementById('retake-count').textContent = retakeCount;
 
-  document.getElementById('gpa-display').textContent =
-    `Current GPA: ${curGPA.toFixed(2)} / 4.33 → Projected: ${projGPA.toFixed(2)} / 4.33 (${sign}${diff})`;
+  const projEl = document.getElementById('proj-gpa');
+  projEl.textContent = projGPA.toFixed(2);
+  projEl.className = 'card-value ' + (diff > 0 ? 'positive' : diff < 0 ? 'negative' : '');
 }

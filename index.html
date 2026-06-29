@@ -2,22 +2,55 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>GPA Calculator</title>
+  <title>TMU GPA Calculator</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <input type="file" id="csv-input" accept=".csv">
-  <p id="gpa-display"></p>
-  <table id="course-table">
-    <thead>
-      <tr>
-        <th>Course</th>
-        <th>Credits</th>
-        <th>Grade</th>
-        <th>Grade Points</th>
-      </tr>
-    </thead>
-    <tbody id="course-tbody"></tbody>
-  </table>
+  <div class="container">
+    <h1>TMU GPA Calculator</h1>
+    <p class="subtitle">Upload your courses CSV to calculate your GPA and simulate retakes.</p>
+
+    <div class="upload-area" id="drop-zone">
+      <p>📂 Click to upload CSV or drag and drop</p>
+      <p class="hint">Format: <code>course, credits, grade</code></p>
+      <input type="file" id="csv-input" accept=".csv">
+    </div>
+
+    <div id="results" style="display:none">
+      <div class="gpa-cards">
+        <div class="card">
+          <span class="card-label">Current GPA</span>
+          <span class="card-value" id="cur-gpa">—</span>
+        </div>
+        <div class="card">
+          <span class="card-label">Projected GPA</span>
+          <span class="card-value" id="proj-gpa">—</span>
+        </div>
+        <div class="card">
+          <span class="card-label">Total Credits</span>
+          <span class="card-value" id="total-credits">—</span>
+        </div>
+        <div class="card">
+          <span class="card-label">Retaking</span>
+          <span class="card-value" id="retake-count">0</span>
+        </div>
+      </div>
+
+      <table id="course-table">
+        <thead>
+          <tr>
+            <th>Course</th>
+            <th>Credits</th>
+            <th>Grade</th>
+            <th>Grade Points</th>
+            <th>Retake?</th>
+            <th>Target Grade</th>
+          </tr>
+        </thead>
+        <tbody id="course-tbody"></tbody>
+      </table>
+    </div>
+  </div>
   <script src="app.js"></script>
 </body>
 </html>
